@@ -18,3 +18,13 @@ export interface Task {
   /** 创建时间，ISO 8601 日期时间字符串 */
   createdAt: string
 }
+
+/**
+ * 新建任务的表单产出。
+ * 只包含用户填写的字段；id / status / dueDate / createdAt 由数据层补齐。
+ */
+export interface TaskDraft {
+  title: string
+  description: string
+  priority: TaskPriority
+}

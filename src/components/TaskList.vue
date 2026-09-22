@@ -8,6 +8,7 @@ const props = defineProps<{ tasks: Task[] }>()
 const emit = defineEmits<{
   toggle: [id: string]
   delete: [id: string]
+  create: []
 }>()
 
 /** 筛选按钮，'all' 表示不筛选 */
@@ -74,13 +75,22 @@ const visibleTasks = computed(() => {
     </p>
 
     <ul v-else class="mt-4 space-y-3">
-      <TaskCard
-        v-for="task in visibleTasks"
-        :key="task.id"
-        :task="task"
-        @toggle="emit('toggle', task.id)"
-        @delete="emit('delete', task.id)"
-      />
+      <li v-for="task in visibleTasks" :key="task.id">
+        <TaskCard
+          :task="task"
+          @toggle="emit('toggle', task.id)"
+          @delete="emit('delete', task.id)"
+        />
+      </li>
     </ul>
+
+    <!-- 新建入口：始终在列表下方 -->
+    <button
+      type="button"
+      class="mt-4 w-full rounded-xl border border-dashed border-indigo-300 bg-white px-4 py-3 text-sm font-medium text-indigo-600 transition hover:border-indigo-400 hover:bg-indigo-50 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:outline-none"
+      @click="emit('create')"
+    >
+      + 新建任务
+    </button>
   </div>
 </template>

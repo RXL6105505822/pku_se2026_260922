@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import TaskList from './components/TaskList.vue'
-import type { Task } from './types/task'
+import TaskModal from './components/TaskModal.vue'
+import type { Task, TaskDraft } from './types/task'
 
 // 假数据：后续替换为真实数据源
 const tasks = ref<Task[]>([
@@ -62,6 +63,25 @@ function toggleTask(id: string) {
 function deleteTask(id: string) {
   tasks.value = tasks.value.filter((item) => item.id !== id)
 }
+
+const showModal = ref(false)
+
+/** 本地日历日期（不用 toISOString，那会按 UTC 算，可能差一天） */
+function todayIso() {
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+}
+
+function createTask(draft: TaskDraft) {
+  tasks.value.push({
+    id: crypto.randomUUID(),
+    ...draft,
+    status: 'todo',
+    dueDate: todayIso(),
+    createdAt: new Date().toISOString(),
+  })
+}
 </script>
 
 <template>
@@ -101,7 +121,14 @@ function deleteTask(id: string) {
         <p class="mt-1 text-sm text-slate-500">当前为示例数据，稍后接入真实功能。</p>
       </div>
 
-      <TaskList :tasks="tasks" @toggle="toggleTask" @delete="deleteTask" />
+      <TaskList
+        :tasks="tasks"
+        @toggle="toggleTask"
+        @delete="deleteTask"
+        @create="showModal = true"
+      />
+
+      <TaskModal v-model="showModal" @submit="createTask" />
     </main>
   </div>
 </template>
