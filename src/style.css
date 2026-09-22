@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+
+/* 字体栈里补上中文字体，保证 Windows / macOS 下中文渲染一致 */
+@theme {
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;
+}
