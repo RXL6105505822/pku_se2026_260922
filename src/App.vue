@@ -2,84 +2,13 @@
 import { ref } from 'vue'
 import TaskList from './components/TaskList.vue'
 import TaskModal from './components/TaskModal.vue'
-import type { Task, TaskDraft, TaskStatus } from './types/task'
+import { addTask, deleteTask, state, toggleTask, updateTask } from './stores/taskStore'
+import type { TaskStatus } from './types/task'
 
-// 假数据：后续替换为真实数据源
-const tasks = ref<Task[]>([
-  {
-    id: '1',
-    title: '搭建项目骨架',
-    description: '初始化 Vue 3 + Vite + Tailwind 的项目结构，确定目录约定。',
-    status: 'done',
-    priority: 'high',
-    dueDate: '2026-09-18',
-    createdAt: '2026-09-15T09:00:00+08:00',
-  },
-  {
-    id: '2',
-    title: '实现任务列表页',
-    description: '任务卡片展示标题、描述、状态与截止日期，支持按状态筛选。',
-    status: 'in-progress',
-    priority: 'high',
-    dueDate: '2026-09-25',
-    createdAt: '2026-09-16T10:30:00+08:00',
-  },
-  {
-    id: '3',
-    title: '任务创建与编辑表单',
-    description: '支持新建任务、修改标题与描述，并校验必填项。',
-    status: 'in-progress',
-    priority: 'medium',
-    dueDate: '2026-09-28',
-    createdAt: '2026-09-17T14:05:00+08:00',
-  },
-  {
-    id: '4',
-    title: '接入本地存储',
-    description: '把任务数据持久化到 localStorage，避免刷新后丢失。',
-    status: 'todo',
-    priority: 'medium',
-    dueDate: '2026-10-02',
-    createdAt: '2026-09-19T11:20:00+08:00',
-  },
-  {
-    id: '5',
-    title: '补充 README 使用说明',
-    description: '写清楚本地启动方式、目录结构与后续开发计划。',
-    status: 'todo',
-    priority: 'low',
-    dueDate: '2026-10-08',
-    createdAt: '2026-09-20T16:40:00+08:00',
-  },
-])
-
-/** 复选框只表达「完成 / 未完成」，取消勾选一律回到 todo */
-function toggleTask(id: string) {
-  const task = tasks.value.find((item) => item.id === id)
-  if (!task) return
-  task.status = task.status === 'done' ? 'todo' : 'done'
-}
-
-function deleteTask(id: string) {
-  tasks.value = tasks.value.filter((item) => item.id !== id)
-}
-
-/** 由卡片上的状态下拉直接指定三态之一 */
-function setStatus(id: string, status: TaskStatus) {
-  const task = tasks.value.find((item) => item.id === id)
-  if (task) task.status = status
-}
-
+/** 弹窗开关属于纯 UI 状态，不进 store */
 const showModal = ref(false)
 
-function createTask(draft: TaskDraft) {
-  tasks.value.push({
-    id: crypto.randomUUID(),
-    ...draft,
-    status: 'todo',
-    createdAt: new Date().toISOString(),
-  })
-}
+const setStatus = (id: string, status: TaskStatus) => updateTask(id, { status })
 </script>
 
 <template>
@@ -107,7 +36,7 @@ function createTask(draft: TaskDraft) {
         <span
           class="ml-auto rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700 ring-1 ring-indigo-200 ring-inset"
         >
-          {{ tasks.length }} 个任务
+          {{ state.tasks.length }} 个任务
         </span>
       </div>
     </header>
@@ -116,18 +45,18 @@ function createTask(draft: TaskDraft) {
     <main class="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <div class="mb-5">
         <h2 class="text-lg font-semibold tracking-tight">任务列表</h2>
-        <p class="mt-1 text-sm text-slate-500">当前为示例数据，稍后接入真实功能。</p>
+        <p class="mt-1 text-sm text-slate-500">数据已保存到浏览器本地，刷新不会丢失。</p>
       </div>
 
       <TaskList
-        :tasks="tasks"
+        :tasks="state.tasks"
         @toggle="toggleTask"
         @delete="deleteTask"
         @status-change="setStatus"
         @create="showModal = true"
       />
 
-      <TaskModal v-model="showModal" @submit="createTask" />
+      <TaskModal v-model="showModal" @submit="addTask" />
     </main>
   </div>
 </template>
