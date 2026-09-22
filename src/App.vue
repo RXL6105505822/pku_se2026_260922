@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import TaskCard from './components/TaskCard.vue'
+import TaskList from './components/TaskList.vue'
 import type { Task } from './types/task'
 
 // 假数据：后续替换为真实数据源
@@ -101,22 +101,7 @@ function deleteTask(id: string) {
         <p class="mt-1 text-sm text-slate-500">当前为示例数据，稍后接入真实功能。</p>
       </div>
 
-      <p
-        v-if="tasks.length === 0"
-        class="rounded-xl border border-dashed border-slate-300 bg-white px-4 py-12 text-center text-sm text-slate-500"
-      >
-        暂无任务
-      </p>
-
-      <ul v-else class="space-y-3">
-        <TaskCard
-          v-for="task in tasks"
-          :key="task.id"
-          :task="task"
-          @toggle="toggleTask(task.id)"
-          @delete="deleteTask(task.id)"
-        />
-      </ul>
+      <TaskList :tasks="tasks" @toggle="toggleTask" @delete="deleteTask" />
     </main>
   </div>
 </template>
