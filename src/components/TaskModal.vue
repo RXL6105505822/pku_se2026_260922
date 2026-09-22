@@ -10,10 +10,16 @@ const emit = defineEmits<{
   submit: [draft: TaskDraft]
 }>()
 
-const form = reactive<{ title: string; description: string; priority: TaskPriority }>({
+const form = reactive<{
+  title: string
+  description: string
+  priority: TaskPriority
+  dueDate: string
+}>({
   title: '',
   description: '',
   priority: 'medium',
+  dueDate: '',
 })
 
 const error = ref('')
@@ -29,6 +35,7 @@ function reset() {
   form.title = ''
   form.description = ''
   form.priority = 'medium'
+  form.dueDate = ''
   error.value = ''
 }
 
@@ -45,6 +52,8 @@ function handleSubmit() {
     title: form.title.trim(),
     description: form.description.trim(),
     priority: form.priority,
+    // 没选日期就不带这个字段（Task.dueDate 是可选的），避免塞一个假日期
+    ...(form.dueDate ? { dueDate: form.dueDate } : {}),
   })
   close()
 }
@@ -136,19 +145,33 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             />
           </div>
 
-          <div>
-            <label for="task-priority" class="block text-sm font-medium text-slate-700">
-              优先级
-            </label>
-            <select
-              id="task-priority"
-              v-model="form.priority"
-              class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-            >
-              <option v-for="priority in TASK_PRIORITIES" :key="priority" :value="priority">
-                {{ PRIORITY_LABELS[priority] }}
-              </option>
-            </select>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <label for="task-priority" class="block text-sm font-medium text-slate-700">
+                优先级
+              </label>
+              <select
+                id="task-priority"
+                v-model="form.priority"
+                class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              >
+                <option v-for="priority in TASK_PRIORITIES" :key="priority" :value="priority">
+                  {{ PRIORITY_LABELS[priority] }}
+                </option>
+              </select>
+            </div>
+
+            <div>
+              <label for="task-due-date" class="block text-sm font-medium text-slate-700">
+                截止日期 <span class="font-normal text-slate-400">（选填）</span>
+              </label>
+              <input
+                id="task-due-date"
+                v-model="form.dueDate"
+                type="date"
+                class="mt-1.5 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              />
+            </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-1">

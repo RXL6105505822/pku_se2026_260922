@@ -110,7 +110,9 @@ function formatDueDate(isoDate: string) {
 
       <p class="mt-1.5 line-clamp-2 text-sm text-slate-500">{{ task.description }}</p>
 
-      <p class="mt-3 text-xs text-slate-500">截止 {{ formatDueDate(task.dueDate) }}</p>
+      <p v-if="task.dueDate" class="mt-3 text-xs text-slate-500">
+        截止 {{ formatDueDate(task.dueDate) }}
+      </p>
     </div>
   </div>
 </template>

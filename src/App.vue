@@ -66,19 +66,11 @@ function deleteTask(id: string) {
 
 const showModal = ref(false)
 
-/** 本地日历日期（不用 toISOString，那会按 UTC 算，可能差一天） */
-function todayIso() {
-  const now = new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
-}
-
 function createTask(draft: TaskDraft) {
   tasks.value.push({
     id: crypto.randomUUID(),
     ...draft,
     status: 'todo',
-    dueDate: todayIso(),
     createdAt: new Date().toISOString(),
   })
 }
