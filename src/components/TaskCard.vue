@@ -1,15 +1,33 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Task, TaskPriority } from '../types/task'
+import { TASK_STATUSES } from '../types/task'
+import type { Task, TaskPriority, TaskStatus } from '../types/task'
 
 const props = defineProps<{ task: Task }>()
 
 const emit = defineEmits<{
   toggle: []
   delete: []
+  statusChange: [status: TaskStatus]
 }>()
 
 const isDone = computed(() => props.task.status === 'done')
+
+/**
+ * 状态选择器直接读写 props.task.status 是禁止的，
+ * 所以包一层可写 computed：读 prop，写则抛事件交给父组件改。
+ */
+const status = computed({
+  get: () => props.task.status,
+  set: (value: TaskStatus) => emit('statusChange', value),
+})
+
+/** 状态配色与文案；done 用 emerald，与「低优先级」的绿靠文字区分 */
+const statusMeta: Record<TaskStatus, { label: string; chip: string }> = {
+  todo: { label: '待办', chip: 'bg-slate-100 text-slate-600 ring-slate-200' },
+  'in-progress': { label: '进行中', chip: 'bg-indigo-50 text-indigo-700 ring-indigo-200' },
+  done: { label: '完成', chip: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
+}
 
 /** 优先级配色：左边框颜色 + 标签样式 */
 const priorityMeta: Record<TaskPriority, { label: string; border: string; badge: string }> = {
@@ -110,9 +128,38 @@ function formatDueDate(isoDate: string) {
 
       <p class="mt-1.5 line-clamp-2 text-sm text-slate-500">{{ task.description }}</p>
 
-      <p v-if="task.dueDate" class="mt-3 text-xs text-slate-500">
-        截止 {{ formatDueDate(task.dueDate) }}
-      </p>
+      <div class="mt-3 flex items-center gap-2 text-xs text-slate-500">
+        <!-- 状态下拉：既显示当前状态，也是修改入口。用原生 select，键盘与读屏支持是白送的 -->
+        <span class="relative inline-flex items-center">
+          <select
+            v-model="status"
+            :aria-label="`「${task.title}」的状态`"
+            class="cursor-pointer appearance-none rounded-full py-0.5 pr-5 pl-2 text-xs font-medium ring-1 ring-inset outline-none transition focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-1"
+            :class="statusMeta[task.status].chip"
+          >
+            <option v-for="option in TASK_STATUSES" :key="option" :value="option">
+              {{ statusMeta[option].label }}
+            </option>
+          </select>
+          <svg
+            class="pointer-events-none absolute right-1 size-3 opacity-50"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </span>
+
+        <template v-if="task.dueDate">
+          <span class="text-slate-300" aria-hidden="true">·</span>
+          <span>截止 {{ formatDueDate(task.dueDate) }}</span>
+        </template>
+      </div>
     </div>
   </div>
 </template>

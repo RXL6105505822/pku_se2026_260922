@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import TaskList from './components/TaskList.vue'
 import TaskModal from './components/TaskModal.vue'
-import type { Task, TaskDraft } from './types/task'
+import type { Task, TaskDraft, TaskStatus } from './types/task'
 
 // 假数据：后续替换为真实数据源
 const tasks = ref<Task[]>([
@@ -64,6 +64,12 @@ function deleteTask(id: string) {
   tasks.value = tasks.value.filter((item) => item.id !== id)
 }
 
+/** 由卡片上的状态下拉直接指定三态之一 */
+function setStatus(id: string, status: TaskStatus) {
+  const task = tasks.value.find((item) => item.id === id)
+  if (task) task.status = status
+}
+
 const showModal = ref(false)
 
 function createTask(draft: TaskDraft) {
@@ -117,6 +123,7 @@ function createTask(draft: TaskDraft) {
         :tasks="tasks"
         @toggle="toggleTask"
         @delete="deleteTask"
+        @status-change="setStatus"
         @create="showModal = true"
       />
 

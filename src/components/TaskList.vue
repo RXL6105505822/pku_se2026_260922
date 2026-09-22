@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import TaskCard from './TaskCard.vue'
-import type { Task } from '../types/task'
+import type { Task, TaskStatus } from '../types/task'
 
 const props = defineProps<{ tasks: Task[] }>()
 
@@ -9,6 +9,7 @@ const emit = defineEmits<{
   toggle: [id: string]
   delete: [id: string]
   create: []
+  statusChange: [id: string, status: TaskStatus]
 }>()
 
 /** 筛选按钮，'all' 表示不筛选 */
@@ -80,6 +81,7 @@ const visibleTasks = computed(() => {
           :task="task"
           @toggle="emit('toggle', task.id)"
           @delete="emit('delete', task.id)"
+          @status-change="(status) => emit('statusChange', task.id, status)"
         />
       </li>
     </ul>
